@@ -1,2 +1,3 @@
-# -alx-portfolio_project
-a portfolio project for ALX Software Engineering Program
+# alx-portfolio_project : Maze Project
+
+A portfolio project for ALX Software Engineering Program
