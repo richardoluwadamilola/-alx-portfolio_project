@@ -32,12 +32,12 @@
 #include "../headers/upng.h"
 
 #define MAKE_BYTE(b) ((b) & 0xFF)
-#define MAKE_DWORD(a,b,c,d) ((MAKE_BYTE(a) << 24) | (MAKE_BYTE(b) << 16) | (MAKE_BYTE(c) << 8) | MAKE_BYTE(d))
+#define MAKE_DWORD(a, b, c, d) ((MAKE_BYTE(a) << 24) | (MAKE_BYTE(b) << 16) | (MAKE_BYTE(c) << 8) | MAKE_BYTE(d))
 #define MAKE_DWORD_PTR(p) MAKE_DWORD((p)[0], (p)[1], (p)[2], (p)[3])
 
-#define CHUNK_IHDR MAKE_DWORD('I','H','D','R')
-#define CHUNK_IDAT MAKE_DWORD('I','D','A','T')
-#define CHUNK_IEND MAKE_DWORD('I','E','N','D')
+#define CHUNK_IHDR MAKE_DWORD('I', 'H', 'D', 'R')
+#define CHUNK_IDAT MAKE_DWORD('I', 'D', 'A', 'T')
+#define CHUNK_IEND MAKE_DWORD('I', 'E', 'N', 'D')
 
 #define FIRST_LENGTH_CODE_INDEX 257
 #define LAST_LENGTH_CODE_INDEX 285
@@ -56,80 +56,84 @@
 #define DISTANCE_BUFFER_SIZE (NUM_DISTANCE_SYMBOLS * 2)
 #define CODE_LENGTH_BUFFER_SIZE (NUM_DISTANCE_SYMBOLS * 2)
 
-#define SET_ERROR(upng,code) do { (upng)->error = (code); (upng)->error_line = __LINE__; } while (0)
+#define SET_ERROR(upng, code) do { (upng)->error = (code); 
+#(upng)->error_line = __LINE__; } while (0)
 
 #define upng_chunk_length(chunk) MAKE_DWORD_PTR(chunk)
 #define upng_chunk_type(chunk) MAKE_DWORD_PTR((chunk) + 4)
 #define upng_chunk_critical(chunk) (((chunk)[4] & 32) == 0)
 
-typedef enum upng_state {
+typedef enum upng_state 
+{
 	UPNG_ERROR = -1,
 	UPNG_DECODED = 0,
 	UPNG_HEADER = 1,
 	UPNG_NEW = 2
 } upng_state;
 
-typedef enum upng_color {
+typedef enum upng_color 
+{
 	UPNG_LUM = 0,
 	UPNG_RGB = 2,
 	UPNG_LUMA = 4,
 	UPNG_RGBA = 6
 } upng_color;
 
-typedef struct upng_source {
-	const unsigned char* buffer;
-	unsigned long			size;
-	char					owning;
+typedef struct upng_source 
+{
+	const unsigned char *buffer;
+	unsigned long size;
+	char owning;
 } upng_source;
 
 struct upng_t {
-	unsigned		width;
-	unsigned		height;
+	unsigned int		width;
+	unsigned int		height;
 
 	upng_color		color_type;
-	unsigned		color_depth;
+	unsigned int		color_depth;
 	upng_format		format;
 
-	unsigned char* buffer;
+	unsigned char *buffer;
 	unsigned long	size;
 
 	upng_error		error;
-	unsigned		error_line;
+	unsigned int		error_line;
 
 	upng_state		state;
 	upng_source		source;
 };
 
 typedef struct huffman_tree {
-	unsigned* tree2d;
-	unsigned maxbitlen;
-	unsigned numcodes;
+	unsigned int *tree2d;
+	unsigned int maxbitlen;
+	unsigned int numcodes;
 } huffman_tree;
 
-static const unsigned LENGTH_BASE[29] = {
+static const unsigned int LENGTH_BASE[29] = {
 	3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59,
 	67, 83, 99, 115, 131, 163, 195, 227, 258
 };
 
-static const unsigned LENGTH_EXTRA[29] = {
+static const unsigned int LENGTH_EXTRA[29] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5,
 	5, 5, 5, 0
 };
 
-static const unsigned DISTANCE_BASE[30] = {
+static const unsigned int DISTANCE_BASE[30] = {
 	1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513,
 	769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577
 };
 
-static const unsigned DISTANCE_EXTRA[30] = {	/*the extra bits of backwards distances (added to base) */
+static const unsigned int DISTANCE_EXTRA[30] = {	/*the extra bits of backwards distances (added to base) */
 	0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10,
 	11, 11, 12, 12, 13, 13
 };
 
-static const unsigned CLCL[NUM_CODE_LENGTH_CODES]	/*the order in which "code length alphabet code lengths" are stored, out of this the huffman tree of the dynamic huffman tree lengths is generated */
+static const unsigned int CLCL[NUM_CODE_LENGTH_CODES]	/*the order in which "code length alphabet code lengths" are stored, out of this the huffman tree of the dynamic huffman tree lengths is generated */
 = { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
 
-static const unsigned FIXED_DEFLATE_CODE_TREE[NUM_DEFLATE_CODE_SYMBOLS * 2] = {
+static const unsigned int FIXED_DEFLATE_CODE_TREE[NUM_DEFLATE_CODE_SYMBOLS * 2] = {
 	289, 370, 290, 307, 546, 291, 561, 292, 293, 300, 294, 297, 295, 296, 0, 1,
 	2, 3, 298, 299, 4, 5, 6, 7, 301, 304, 302, 303, 8, 9, 10, 11, 305, 306, 12,
 	13, 14, 15, 308, 339, 309, 324, 310, 317, 311, 314, 312, 313, 16, 17, 18,
@@ -169,7 +173,7 @@ static const unsigned FIXED_DEFLATE_CODE_TREE[NUM_DEFLATE_CODE_SYMBOLS * 2] = {
 	572, 570, 571, 280, 281, 282, 283, 573, 574, 284, 285, 286, 287, 0, 0
 };
 
-static const unsigned FIXED_DISTANCE_TREE[NUM_DISTANCE_SYMBOLS * 2] = {
+static const unsigned int FIXED_DISTANCE_TREE[NUM_DISTANCE_SYMBOLS * 2] = {
 	33, 48, 34, 41, 35, 38, 36, 37, 0, 1, 2, 3, 39, 40, 4, 5, 6, 7, 42, 45, 43,
 	44, 8, 9, 10, 11, 46, 47, 12, 13, 14, 15, 49, 56, 50, 53, 51, 52, 16, 17,
 	18, 19, 54, 55, 20, 21, 22, 23, 57, 60, 58, 59, 24, 25, 26, 27, 61, 62, 28,
@@ -185,7 +189,7 @@ static unsigned char read_bit(unsigned long* bitpointer, const unsigned char* bi
 
 static unsigned read_bits(unsigned long* bitpointer, const unsigned char* bitstream, unsigned long nbits)
 {
-	unsigned result = 0, i;
+	unsigned int result = 0, i;
 	for (i = 0; i < nbits; i++)
 		result |= ((unsigned)read_bit(bitpointer, bitstream)) << i;
 	return result;
@@ -270,9 +274,9 @@ static void huffman_tree_create_lengths(upng_t* upng, huffman_tree* tree, const 
 	}
 }
 
-static unsigned huffman_decode_symbol(upng_t* upng, const unsigned char* in, unsigned long* bp, const huffman_tree* codetree, unsigned long inlength)
+static unsigned int huffman_decode_symbol(upng_t* upng, const unsigned char* in, unsigned long* bp, const huffman_tree* codetree, unsigned long inlength)
 {
-	unsigned treepos = 0, ct;
+	unsigned int treepos = 0, ct;
 	unsigned char bit;
 	for (;;) {
 		/* error: end of input memory reached without endcode */
@@ -463,9 +467,9 @@ static void get_tree_inflate_dynamic(upng_t* upng, huffman_tree* codetree, huffm
 /*inflate a block with dynamic of fixed Huffman tree*/
 static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outsize, const unsigned char* in, unsigned long* bp, unsigned long* pos, unsigned long inlength, unsigned btype)
 {
-	unsigned codetree_buffer[DEFLATE_CODE_BUFFER_SIZE];
-	unsigned codetreeD_buffer[DISTANCE_BUFFER_SIZE];
-	unsigned done = 0;
+	unsigned int codetree_buffer[DEFLATE_CODE_BUFFER_SIZE];
+	unsigned int codetreeD_buffer[DISTANCE_BUFFER_SIZE];
+	unsigned int done = 0;
 
 	huffman_tree codetree;
 	huffman_tree codetreeD;
@@ -477,7 +481,7 @@ static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outs
 	}
 	else if (btype == 2) {
 		/* dynamic trees */
-		unsigned codelengthcodetree_buffer[CODE_LENGTH_BUFFER_SIZE];
+		unsigned int codelengthcodetree_buffer[CODE_LENGTH_BUFFER_SIZE];
 		huffman_tree codelengthcodetree;
 
 		huffman_tree_init(&codetree, codetree_buffer, NUM_DEFLATE_CODE_SYMBOLS, DEFLATE_CODE_BITLEN);
@@ -487,7 +491,7 @@ static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outs
 	}
 
 	while (done == 0) {
-		unsigned code = huffman_decode_symbol(upng, in, bp, &codetree, inlength);
+		unsigned int code = huffman_decode_symbol(upng, in, bp, &codetree, inlength);
 		if (upng->error != UPNG_EOK) {
 			return;
 		}
@@ -509,7 +513,7 @@ static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outs
 		else if (code >= FIRST_LENGTH_CODE_INDEX && code <= LAST_LENGTH_CODE_INDEX) {	/*length code */
 		 /* part 1: get length base */
 			unsigned long length = LENGTH_BASE[code - FIRST_LENGTH_CODE_INDEX];
-			unsigned codeD, distance, numextrabitsD;
+			unsigned int codeD, distance, numextrabitsD;
 			unsigned long start, forward, backward, numextrabits;
 
 			/* part 2: get extra bits and add the value of that to length */
@@ -571,7 +575,7 @@ static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outs
 static void inflate_uncompressed(upng_t* upng, unsigned char* out, unsigned long outsize, const unsigned char* in, unsigned long* bp, unsigned long* pos, unsigned long inlength)
 {
 	unsigned long p;
-	unsigned len, nlen, n;
+	unsigned int len, nlen, n;
 
 	/* go to first boundary of byte */
 	while (((*bp) & 0x7) != 0) {
@@ -772,7 +776,7 @@ static void unfilter(upng_t* upng, unsigned char* out, const unsigned char* in, 
 	}
 }
 
-static void remove_padding_bits(unsigned char* out, const unsigned char* in, unsigned long olinebits, unsigned long ilinebits, unsigned h)
+static void remove_padding_bits(unsigned char *out, const unsigned char *in, unsigned long olinebits, unsigned long ilinebits, unsigned h)
 {
 	unsigned y;
 	unsigned long diff = ilinebits - olinebits;
@@ -794,11 +798,11 @@ static void remove_padding_bits(unsigned char* out, const unsigned char* in, uns
 }
 
 /*out must be buffer big enough to contain full image, and in must contain the full decompressed data from the IDAT chunks*/
-static void post_process_scanlines(upng_t* upng, unsigned char* out, unsigned char* in, const upng_t* info_png)
+static void post_process_scanlines(upng_t *upng, unsigned char *out, unsigned char *in, const upng_t* info_png)
 {
-	unsigned bpp = upng_get_bpp(info_png);
-	unsigned w = info_png->width;
-	unsigned h = info_png->height;
+	unsigned int bpp = upng_get_bpp(info_png);
+	unsigned int w = info_png->width;
+	unsigned int h = info_png->height;
 
 	if (bpp == 0) {
 		SET_ERROR(upng, UPNG_EMALFORMED);
@@ -817,7 +821,7 @@ static void post_process_scanlines(upng_t* upng, unsigned char* out, unsigned ch
 	}
 }
 
-static upng_format determine_format(upng_t* upng) {
+static upng_format determine_format(upng_t *upng) {
 	switch (upng->color_type) {
 	case UPNG_LUM:
 		switch (upng->color_depth) {
@@ -941,11 +945,11 @@ upng_error upng_header(upng_t* upng)
 }
 
 /*read a PNG, the result will be in the same color type as the PNG (hence "generic")*/
-upng_error upng_decode(upng_t* upng)
+upng_error upng_decode(upng_t *upng)
 {
-	const unsigned char* chunk, * data;
-	unsigned char* compressed;
-	unsigned char* inflated;
+	const unsigned char *chunk, *data;
+	unsigned char *compressed;
+	unsigned char *inflated;
 	unsigned long compressed_size = 0, compressed_index = 0;
 	unsigned long inflated_size;
 	unsigned long length;
