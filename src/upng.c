@@ -32,8 +32,7 @@
 #include "../headers/upng.h"
 
 #define MAKE_BYTE(b) ((b) & 0xFF)
-/**define MAKE_DWORD(a, b, c, d) ((MAKE_BYTE(a) << 24) | 
-(MAKE_BYTE(b) << 16) | (MAKE_BYTE(c) << 8) | MAKE_BYTE(d))**/
+#define MAKE_DWORD(a, b, c, d) ((MAKE_BYTE(a) << 24) | (MAKE_BYTE(b) << 16) | (MAKE_BYTE(c) << 8) | MAKE_BYTE(d))
 #define MAKE_DWORD_PTR(p) MAKE_DWORD((p)[0], (p)[1], (p)[2], (p)[3])
 
 #define CHUNK_IHDR MAKE_DWORD('I', 'H', 'D', 'R')
@@ -57,8 +56,7 @@
 #define DISTANCE_BUFFER_SIZE (NUM_DISTANCE_SYMBOLS * 2)
 #define CODE_LENGTH_BUFFER_SIZE (NUM_DISTANCE_SYMBOLS * 2)
 
-#define SET_ERROR(upng, code) do { (upng)->error = (code)
-#(upng)->error_line = __LINE__; } while (0)
+#define SET_ERROR(upng, code) do { (upng)->error = (code)(upng)->error_line = __LINE__; } while (0)
 
 #define upng_chunk_length(chunk) MAKE_DWORD_PTR(chunk)
 #define upng_chunk_type(chunk) MAKE_DWORD_PTR((chunk) + 4)
@@ -184,7 +182,7 @@ static const unsigned int FIXED_DISTANCE_TREE[NUM_DISTANCE_SYMBOLS * 2] = {
 	29, 30, 31, 0, 0
 };
 
-static unsigned char read_bit(unsigned long* bitpointer, const unsigned char *bitstream)
+static unsigned char read_bit(unsigned long *bitpointer, const unsigned char *bitstream)
 {
 	unsigned char result = (unsigned char)((bitstream[(*bitpointer) 
 	>> 3] >> ((*bitpointer) & 0x7)) & 1);
@@ -201,7 +199,7 @@ static unsigned read_bits(unsigned long *bitpointer, const unsigned char *bitstr
 }
 
 /* the buffer must be numcodes*2 in size! */
-static void huffman_tree_init(huffman_tree* tree, unsigned* buffer, unsigned numcodes, unsigned maxbitlen)
+static void huffman_tree_init(huffman_tree *tree, unsigned* buffer, unsigned numcodes, unsigned maxbitlen)
 {
 	tree->tree2d = buffer;
 
@@ -211,7 +209,7 @@ static void huffman_tree_init(huffman_tree* tree, unsigned* buffer, unsigned num
 
 /*given the code lengths (as stored in the PNG file), generate the tree as defined by Deflate. 
 maxbitlen is the maximum bits that a code in the tree can have. return value is error.*/
-static void huffman_tree_create_lengths(upng_t* upng, huffman_tree *tree, const unsigned int *bitlen)
+static void huffman_tree_create_lengths(upng_t *upng, huffman_tree *tree, const unsigned int *bitlen)
 {
 	unsigned int tree1d[MAX_SYMBOLS];
 	unsigned int blcount[MAX_BIT_LENGTH];
@@ -287,7 +285,7 @@ static void huffman_tree_create_lengths(upng_t* upng, huffman_tree *tree, const 
 	}
 }
 
-static unsigned int huffman_decode_symbol(upng_t* upng, const unsigned char *in, 
+static unsigned int huffman_decode_symbol(upng_t *upng, const unsigned char *in, 
 unsigned long *bp, const huffman_tree *codetree, unsigned long inlength)
 {
 	unsigned int treepos = 0, ct;
@@ -316,7 +314,7 @@ unsigned long *bp, const huffman_tree *codetree, unsigned long inlength)
 
 /* get the tree of a deflated block with dynamic tree, 
 the tree itself is also Huffman compressed with a known tree*/
-static void get_tree_inflate_dynamic(upng_t* upng, huffman_tree *codetree, huffman_tree *codetreeD, huffman_tree *codelengthcodetree, const unsigned char* in, unsigned long* bp, unsigned long inlength)
+static void get_tree_inflate_dynamic(upng_t *upng, huffman_tree *codetree, huffman_tree *codetreeD, huffman_tree *codelengthcodetree, const unsigned char *in, unsigned long *bp, unsigned long inlength)
 {
 	unsigned codelengthcode[NUM_CODE_LENGTH_CODES];
 	unsigned bitlen[NUM_DEFLATE_CODE_SYMBOLS];
@@ -498,7 +496,7 @@ static void get_tree_inflate_dynamic(upng_t* upng, huffman_tree *codetree, huffm
 }
 
 /*inflate a block with dynamic of fixed Huffman tree*/
-static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outsize, const unsigned char* in, unsigned long* bp, unsigned long* pos, unsigned long inlength, unsigned btype)
+static void inflate_huffman(upng_t *upng, unsigned char *out, unsigned long outsize, const unsigned char *in, unsigned long *bp, unsigned long *pos, unsigned long inlength, unsigned btype)
 {
 	unsigned int codetree_buffer[DEFLATE_CODE_BUFFER_SIZE];
 	unsigned int codetreeD_buffer[DISTANCE_BUFFER_SIZE];
@@ -510,8 +508,8 @@ static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outs
 	if (btype == 1) 
 	{
 		/* fixed trees */
-		huffman_tree_init(&codetree, (unsigned*)FIXED_DEFLATE_CODE_TREE, NUM_DEFLATE_CODE_SYMBOLS, DEFLATE_CODE_BITLEN);
-		huffman_tree_init(&codetreeD, (unsigned*)FIXED_DISTANCE_TREE, NUM_DISTANCE_SYMBOLS, DISTANCE_BITLEN);
+		huffman_tree_init(&codetree, (unsigned *)FIXED_DEFLATE_CODE_TREE, NUM_DEFLATE_CODE_SYMBOLS, DEFLATE_CODE_BITLEN);
+		huffman_tree_init(&codetreeD, (unsigned *)FIXED_DISTANCE_TREE, NUM_DISTANCE_SYMBOLS, DISTANCE_BITLEN);
 	}
 	else if (btype == 2) 
 	{
@@ -611,7 +609,7 @@ static void inflate_huffman(upng_t* upng, unsigned char* out, unsigned long outs
 	}
 }
 
-static void inflate_uncompressed(upng_t* upng, unsigned char *out, unsigned long outsize, const unsigned char *in, unsigned long *bp, 
+static void inflate_uncompressed(upng_t *upng, unsigned char *out, unsigned long outsize, const unsigned char *in, unsigned long *bp, 
 unsigned long *pos, unsigned long inlength)
 {
 	unsigned long p;
@@ -664,7 +662,7 @@ unsigned long *pos, unsigned long inlength)
 	(*bp) = p * 8;
 }
 
-static upng_error uz_inflate_data(upng_t* upng, unsigned char *out, unsigned long outsize, 
+static upng_error uz_inflate_data(upng_t *upng, unsigned char *out, unsigned long outsize, 
 const unsigned char *in, unsigned long insize, unsigned long inpos)
 {
 	unsigned long bp = 0;
@@ -708,7 +706,7 @@ const unsigned char *in, unsigned long insize, unsigned long inpos)
 	return upng->error;
 }
 
-static upng_error uz_inflate(upng_t* upng, unsigned char* out, unsigned long outsize, 
+static upng_error uz_inflate(upng_t *upng, unsigned char *out, unsigned long outsize,
 const unsigned char *in, unsigned long insize)
 {
 	/* we require two bytes for the zlib data header */
@@ -755,7 +753,7 @@ static int paeth_predictor(int a, int b, int c)
 		return c;
 }
 
-static void unfilter_scanline(upng_t* upng, unsigned char *recon, const unsigned char *scanline, 
+static void unfilter_scanline(upng_t *upng, unsigned char *recon, const unsigned char *scanline, 
 const unsigned char *precon, unsigned long bytewidth, unsigned char filterType, unsigned long length)
 {
 	unsigned long i;
@@ -817,7 +815,7 @@ for (i = 0; i < bytewidth; i++)
 	}
 }
 
-static void unfilter(upng_t* upng, unsigned char *out, const unsigned char *in, unsigned w, unsigned h, unsigned bpp)
+static void unfilter(upng_t *upng, unsigned char *out, const unsigned char *in, unsigned w, unsigned h, unsigned bpp)
 {
 	unsigned y;
 	unsigned char *prevline = 0;
@@ -864,35 +862,38 @@ static void remove_padding_bits(unsigned char *out, const unsigned char *in, uns
 
 /**out must be buffer big enough to contain full image, 
 and in must contain the full decompressed data from the IDAT chunks**/
-static void post_process_scanlines(upng_t *upng, unsigned char *out, unsigned char *in, const upng_t* info_png)
+static void post_process_scanlines(upng_t *upng, unsigned char *out, unsigned char *in, const upng_t *info_png)
 {
 	unsigned int bpp = upng_get_bpp(info_png);
 	unsigned int w = info_png->width;
 	unsigned int h = info_png->height;
 
-	if (bpp == 0) {
+	if (bpp == 0)
+	{
 		SET_ERROR(upng, UPNG_EMALFORMED);
 		return;
 	}
 
-	if (bpp < 8 && w * bpp != ((w * bpp + 7) / 8) * 8) {
+	if (bpp < 8 && w * bpp != ((w * bpp + 7) / 8) * 8)
+	{
 		unfilter(upng, in, in, w, h, bpp);
 		if (upng->error != UPNG_EOK) {
 			return;
 		}
 		remove_padding_bits(out, in, w * bpp, ((w * bpp + 7) / 8) * 8, h);
 	}
-	else {
+	else
+	{
 		unfilter(upng, out, in, w, h, bpp);
 	}
 }
 
 static upng_format determine_format(upng_t *upng) 
 {
-	switch (upng->color_type) 
+	switch (upng->color_type)
 	{
 	case UPNG_LUM:
-		switch (upng->color_depth) 
+		switch (upng->color_depth)
 		{
 		case 1:
 			return UPNG_LUMINANCE1;
@@ -906,7 +907,7 @@ static upng_format determine_format(upng_t *upng)
 			return UPNG_BADFORMAT;
 		}
 	case UPNG_RGB:
-		switch (upng->color_depth) 
+		switch (upng->color_depth)
 		{
 		case 8:
 			return UPNG_RGB8;
@@ -916,7 +917,7 @@ static upng_format determine_format(upng_t *upng)
 			return UPNG_BADFORMAT;
 		}
 	case UPNG_LUMA:
-		switch (upng->color_depth) 
+		switch (upng->color_depth)
 		{
 		case 1:
 			return UPNG_LUMINANCE_ALPHA1;
@@ -930,7 +931,7 @@ static upng_format determine_format(upng_t *upng)
 			return UPNG_BADFORMAT;
 		}
 	case UPNG_RGBA:
-		switch (upng->color_depth) 
+		switch (upng->color_depth)
 		{
 		case 8:
 			return UPNG_RGBA8;
@@ -944,11 +945,11 @@ static upng_format determine_format(upng_t *upng)
 	}
 }
 
-static void upng_free_source(upng_t* upng)
+static void upng_free_source(upng_t *upng)
 {
 	if (upng->source.owning != 0) 
 	{
-		free((void*)upng->source.buffer);
+		free((void *)upng->source.buffer);
 	}
 
 	upng->source.buffer = NULL;
@@ -957,19 +958,19 @@ static void upng_free_source(upng_t* upng)
 }
 
 
-upng_error upng_header(upng_t* upng)
+upng_error upng_header(upng_t *upng)
 {
-	if (upng->error != UPNG_EOK) 
+	if (upng->error != UPNG_EOK)
 	{
 		return upng->error;
 	}
 
-	if (upng->state != UPNG_NEW) 
+	if (upng->state != UPNG_NEW)
 	{
 		return upng->error;
 	}
 
-	if (upng->source.size < 29) 
+	if (upng->source.size < 29)
 	{
 		SET_ERROR(upng, UPNG_ENOTPNG);
 		return upng->error;
@@ -978,14 +979,14 @@ upng_error upng_header(upng_t* upng)
 	if (upng->source.buffer[0] != 137 || upng->source.buffer[1] != 80 
 	|| upng->source.buffer[2] != 78 || upng->source.buffer[3] != 71 
 	|| upng->source.buffer[4] != 13 || upng->source.buffer[5] != 10 
-	|| upng->source.buffer[6] != 26 || upng->source.buffer[7] != 10) 
+	|| upng->source.buffer[6] != 26 || upng->source.buffer[7] != 10)
 	{
 		SET_ERROR(upng, UPNG_ENOTPNG);
 		return upng->error;
 	}
 
 	/* check that the first chunk is the IHDR chunk */
-	if (MAKE_DWORD_PTR(upng->source.buffer + 12) != CHUNK_IHDR) 
+	if (MAKE_DWORD_PTR(upng->source.buffer + 12) != CHUNK_IHDR)
 	{
 		SET_ERROR(upng, UPNG_EMALFORMED);
 		return upng->error;
@@ -999,27 +1000,27 @@ upng_error upng_header(upng_t* upng)
 
 	/* determine our color format */
 	upng->format = determine_format(upng);
-	if (upng->format == UPNG_BADFORMAT) 
+	if (upng->format == UPNG_BADFORMAT)
 	{
 		SET_ERROR(upng, UPNG_EUNFORMAT);
 		return upng->error;
 	}
 
-	if (upng->source.buffer[26] != 0) 
+	if (upng->source.buffer[26] != 0)
 	{
 		SET_ERROR(upng, UPNG_EMALFORMED);
 		return upng->error;
 	}
 
 	/* check that the compression method (byte 27) is 0 (only allowed value in spec) */
-	if (upng->source.buffer[27] != 0) 
+	if (upng->source.buffer[27] != 0)
 	{
 		SET_ERROR(upng, UPNG_EMALFORMED);
 		return upng->error;
 	}
 
 	/* check that the compression method (byte 27) is 0 (spec allows 1, but uPNG does not support it) */
-	if (upng->source.buffer[28] != 0) 
+	if (upng->source.buffer[28] != 0)
 	{
 		SET_ERROR(upng, UPNG_EUNINTERLACED);
 		return upng->error;
@@ -1040,29 +1041,29 @@ upng_error upng_decode(upng_t *upng)
 	unsigned long length;
 	upng_error error;
 
-	(void)*data;
+	(void) *data;
 
 	/* if we have an error state, bail now */
-	if (upng->error != UPNG_EOK) 
+	if (upng->error != UPNG_EOK)
 	{
 		return upng->error;
 	}
 
 	/* parse the main header, if necessary */
 	upng_header(upng);
-	if (upng->error != UPNG_EOK) 
+	if (upng->error != UPNG_EOK)
 	{
 		return upng->error;
 	}
 
 	/* if the state is not HEADER (meaning we are ready to decode the image), stop now */
-	if (upng->state != UPNG_HEADER) 
+	if (upng->state != UPNG_HEADER)
 	{
 		return upng->error;
 	}
 
 	/* release old result, if any */
-	if (upng->buffer != 0) 
+	if (upng->buffer != 0)
 	{
 		free(upng->buffer);
 		upng->buffer = 0;
@@ -1074,23 +1075,27 @@ upng_error upng_decode(upng_t *upng)
 
 	/* scan through the chunks, finding the size of all IDAT chunks, and also
 	 * verify general well-formed-ness */
-	while (chunk < upng->source.buffer + upng->source.size) {
+	while (chunk < upng->source.buffer + upng->source.size)
+	{
 
 		/* make sure chunk header is not larger than the total compressed */
-		if ((unsigned long)(chunk - upng->source.buffer + 12) > upng->source.size) {
+		if ((unsigned long)(chunk - upng->source.buffer + 12) > upng->source.size)
+		{
 			SET_ERROR(upng, UPNG_EMALFORMED);
 			return upng->error;
 		}
 
 		/* get length; sanity check it */
 		length = upng_chunk_length(chunk);
-		if (length > INT_MAX) {
+		if (length > INT_MAX)
+		{
 			SET_ERROR(upng, UPNG_EMALFORMED);
 			return upng->error;
 		}
 
 		/* make sure chunk header+paylaod is not larger than the total compressed */
-		if ((unsigned long)(chunk - upng->source.buffer + length + 12) > upng->source.size) {
+		if ((unsigned long)(chunk - upng->source.buffer + length + 12) > upng->source.size)
+		{
 			SET_ERROR(upng, UPNG_EMALFORMED);
 			return upng->error;
 		}
@@ -1099,15 +1104,15 @@ upng_error upng_decode(upng_t *upng)
 		data = chunk + 8;
 
 		/* parse chunks */
-		if (upng_chunk_type(chunk) == CHUNK_IDAT) 
+		if (upng_chunk_type(chunk) == CHUNK_IDAT)
 		{
 			compressed_size += length;
 		}
-		else if (upng_chunk_type(chunk) == CHUNK_IEND) 
+		else if (upng_chunk_type(chunk) == CHUNK_IEND)
 		{
 			break;
 		}
-		else if (upng_chunk_critical(chunk)) 
+		else if (upng_chunk_critical(chunk))
 		{
 			SET_ERROR(upng, UPNG_EUNSUPPORTED);
 			return upng->error;
@@ -1117,8 +1122,9 @@ upng_error upng_decode(upng_t *upng)
 	}
 
 	/* allocate enough space for the (compressed and filtered) image data */
-	compressed = (unsigned char*)malloc(compressed_size);
-	if (compressed == NULL) {
+	compressed = (unsigned char *)malloc(compressed_size);
+	if (compressed == NULL)
+	{
 		SET_ERROR(upng, UPNG_ENOMEM);
 		return upng->error;
 	}
@@ -1126,10 +1132,10 @@ upng_error upng_decode(upng_t *upng)
 	/* scan through the chunks again, this time copying the values into
 	 * our compressed buffer.  there's no reason to validate anything a second time. */
 	chunk = upng->source.buffer + 33;
-	while (chunk < upng->source.buffer + upng->source.size) 
+	while (chunk < upng->source.buffer + upng->source.size)
 	{
 		unsigned long length;
-		const unsigned char* data;/the data in the chunk
+		const unsigned char *data;/the data in the chunk
 
 		length = upng_chunk_length(chunk);
 		data = chunk + 8;
@@ -1148,8 +1154,8 @@ upng_error upng_decode(upng_t *upng)
 		chunk += upng_chunk_length(chunk) + 12;
 	}
 	inflated_size = ((upng->width * (upng->height * upng_get_bpp(upng) + 7)) / 8) + upng->height;
-	inflated = (unsigned char*)malloc(inflated_size);
-	if (inflated == NULL) 
+	inflated = (unsigned char *)malloc(inflated_size);
+	if (inflated == NULL)
 	{
 		free(compressed);
 		SET_ERROR(upng, UPNG_ENOMEM);
@@ -1157,7 +1163,7 @@ upng_error upng_decode(upng_t *upng)
 	}
 
 	error = uz_inflate(upng, inflated, inflated_size, compressed, compressed_size);
-	if (error != UPNG_EOK) 
+	if (error != UPNG_EOK)
 	{
 		free(compressed);
 		free(inflated);
@@ -1165,8 +1171,8 @@ upng_error upng_decode(upng_t *upng)
 	}
 	free(compressed);
 	upng->size = (upng->height * upng->width * upng_get_bpp(upng) + 7) / 8;
-	upng->buffer = (unsigned char*)malloc(upng->size);
-	if (upng->buffer == NULL) 
+	upng->buffer = (unsigned char *)malloc(upng->size);
+	if (upng->buffer == NULL)
 	{
 		free(inflated);
 		upng->size = 0;
@@ -1176,13 +1182,13 @@ upng_error upng_decode(upng_t *upng)
 	post_process_scanlines(upng, upng->buffer, inflated, upng);
 	free(inflated);
 
-	if (upng->error != UPNG_EOK) 
+	if (upng->error != UPNG_EOK)
 	{
 		free(upng->buffer);
 		upng->buffer = NULL;
 		upng->size = 0;
 	}
-	else 
+	else
 	{
 		upng->state = UPNG_DECODED;
 	}
@@ -1193,11 +1199,11 @@ upng_error upng_decode(upng_t *upng)
 }
 
 
-static upng_t* upng_new(void)
+static upng_t *upng_new(void)
 {
-	upng_t* upng;
+	upng_t *upng;
 
-	upng = (upng_t*)malloc(sizeof(upng_t));
+	upng = (upng_t *)malloc(sizeof(upng_t));
 	if (upng == NULL) 
 	{
 		return NULL;
@@ -1224,10 +1230,10 @@ static upng_t* upng_new(void)
 	return upng;
 }
 
-upng_t* upng_new_from_bytes(const unsigned char *buffer, unsigned long size)
+upng_t *upng_new_from_bytes(const unsigned char *buffer, unsigned long size)
 {
-	upng_t* upng = upng_new();
-	if (upng == NULL) 
+	upng_t *upng = upng_new();
+	if (upng == NULL)
 	{
 		return NULL;
 	}
@@ -1239,21 +1245,21 @@ upng_t* upng_new_from_bytes(const unsigned char *buffer, unsigned long size)
 	return upng;
 }
 
-upng_t* upng_new_from_file(const char *filename)
+upng_t *upng_new_from_file(const char *filename)
 {
-	upng_t* upng;
-	unsigned char* buffer;
-	FILE* file;
+	upng_t *upng;
+	unsigned char *buffer;
+	FILE *file;
 	long size;
 
 	upng = upng_new();
-	if (upng == NULL) 
+	if (upng == NULL)
 	{
 		return NULL;
 	}
 
 	file = fopen(filename, "rb");
-	if (file == NULL) 
+	if (file == NULL)
 	{
 		SET_ERROR(upng, UPNG_ENOTFOUND);
 		return upng;
@@ -1262,8 +1268,9 @@ upng_t* upng_new_from_file(const char *filename)
 	size = ftell(file);
 	rewind(file);
 
-	buffer = (unsigned char*)malloc((unsigned long)size);
-	if (buffer == NULL) {
+	buffer = (unsigned char *)malloc((unsigned long)size);
+	if (buffer == NULL)
+	{
 		fclose(file);
 		SET_ERROR(upng, UPNG_ENOMEM);
 		return upng;
@@ -1278,9 +1285,9 @@ upng_t* upng_new_from_file(const char *filename)
 	return upng;
 }
 
-void upng_free(upng_t* upng)
+void upng_free(upng_t *upng)
 {
-	if (upng->buffer != NULL) 
+	if (upng->buffer != NULL)
 	{
 		free(upng->buffer);
 	}
@@ -1289,33 +1296,32 @@ void upng_free(upng_t* upng)
 	free(upng);
 }
 
-upng_err
-or upng_get_error(const upng_t* upng)
+upng_error upng_get_error(const upng_t *upng)
 {
 	return upng->error;
 }
 
-unsigned upng_get_error_line(const upng_t* upng)
+unsigned int upng_get_error_line(const upng_t *upng)
 {
 	return upng->error_line;
 }
 
-unsigned upng_get_width(const upng_t* upng)
+unsigned int upng_get_width(const upng_t *upng)
 {
 	return upng->width;
 }
 
-unsigned upng_get_height(const upng_t* upng)
+unsigned  int upng_get_height(const upng_t *upng)
 {
 	return upng->height;
 }
 
-unsigned upng_get_bpp(const upng_t* upng)
+unsigned int upng_get_bpp(const upng_t *upng)
 {
 	return upng_get_bitdepth(upng) * upng_get_components(upng);
 }
 
-unsigned upng_get_components(const upng_t* upng)
+unsigned int upng_get_components(const upng_t *upng)
 {
 	switch (upng->color_type) 
 	{
@@ -1332,29 +1338,29 @@ unsigned upng_get_components(const upng_t* upng)
 	}
 }
 
-unsigned upng_get_bitdepth(const upng_t* upng)
+unsigned int upng_get_bitdepth(const upng_t *upng)
 {
-	return upng->color_depth;
+	return (upng->color_depth);
 }
 
-unsigned upng_get_pixelsize(const upng_t* upng)
+unsigned int upng_get_pixelsize(const upng_t *upng)
 {
 	unsigned bits = upng_get_bitdepth(upng) * upng_get_components(upng);
 	bits += bits % 8;
 	return bits;
 }
 
-upng_format upng_get_format(const upng_t* upng)
+upng_format upng_get_format(const upng_t *upng)
 {
-	return upng->format;
+	return (upng->format);
 }
 
-const unsigned char* upng_get_buffer(const upng_t* upng)
+const unsigned char *upng_get_buffer(const upng_t *upng)
 {
-	return upng->buffer;
+	return (upng->buffer);
 }
 
-unsigned upng_get_size(const upng_t* upng)
+unsigned int upng_get_size(const upng_t *upng)
 {
-	return upng->size;
+	return (upng->size);
 }
