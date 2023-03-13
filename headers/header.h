@@ -1,8 +1,7 @@
-#pragma once
 #ifndef HEADER_H
 #define HEADER_H
 
-//standard library
+/*standard library*/
 #include <SDL2/SDL.h>
 #include <stdint.h>
 #include <math.h>
@@ -12,7 +11,7 @@
 #include <float.h>
 #include "upng.h"
 
-//constants
+/*constants*/
 
 #define PI 3.14159265
 #define TWO_PI 6.28318530
@@ -32,56 +31,56 @@
 #define NUM_TEXTURES 8
 typedef uint32_t color_t;
 
-//variables
+/*variables*/
 extern bool gameRunning;
 
-//function in window file
+/*function in window file*/
 bool initializedWindow(void);
 void renderColorBuffer(void);
 void destroyWindow(void);
 void drawPixel(int x, int y, color_t color);
 void clearColorBuffer(color_t color);
 
-//function in main file
+/*function in main file*/
 void destroyGame(void);
 void setupGame(void);
 void updateGame(void);
 void renderGame(void);
 
-//function in draw file
+/*function in draw file*/
 void drawRectangle(int x, int y, int width, int height, color_t color);
 void drawLine(int x0, int y0, int x1, int y1, color_t color);
 
-//function in rays file
+/*function in rays file*/
 void castAllRays(void);
 void castRay(float rayAngle, int stripId);
 void renderRays(void);
 void horizontalInter(float rayAngle);
 void verticalInter(float rayAngle);
 
-//function in player file
+/*function in player file*/
 void movePlayer(float DeltaTime);
 void renderPlayer(void);
 
-//function in ray_direction file
+/*function in ray_direction file*/
 float distanceBetweenPoints(float x1, float y1, float x2, float y2);
 bool isRayFacingUp(float angle);
 bool isRayFacingDown(float angle);
 bool isRayFacingLeft(float angle);
 bool isRayFacingRight(float angle);
 
-//function in input file
+/*function in input file*/
 void SDL_KEYDOWN_FUNC(SDL_Event event);
 void SDL_KEYUP_FUNC(SDL_Event event);
 void handleInput(void);
 
-//function in map file
+/*function in map file*/
 bool DetectCollision(float x, float y);
 bool isInsideMap(float x, float y);
 void renderMap(void);
 int getMapValue(int row, int col);
 
-//structs for player
+/*structs for player*/
 typedef struct player_s
 {
 	float x;
@@ -95,10 +94,10 @@ typedef struct player_s
 	float turnSpeed;
 } player_t;
 
-//struct variable player
+/*struct variable player*/
 extern player_t player;
 
-//structs for ray
+/*structs for ray*/
 typedef struct ray_s
 {
 	float rayAngle;
@@ -109,7 +108,7 @@ typedef struct ray_s
 	int wallHitContent;
 } ray_t;
 
-//struct variable rays
+/*struct variable rays*/
 extern ray_t rays[NUM_RAYS];
 
 /**

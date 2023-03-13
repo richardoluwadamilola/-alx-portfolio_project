@@ -1,16 +1,12 @@
-#pragma once
 #ifndef UPNG_H
 #define UPNG_H
 /**
 * uPNG -- derived from LodePNG version 20100808
-*
 * Copyright (c) 2005-2010 Lode Vandevenne
 * Copyright (c) 2010 Sean Middleditch
-*
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
 * arising from the use of this software.
-*
 * Permission is granted to anyone to use this software for any purpose,
 * including commercial applications, and to alter it and redistribute it
 * freely, subject to the following restrictions:
@@ -68,7 +64,6 @@ upng_error upng_decode(upng_t *upng);
 
 upng_error upng_get_error(const upng_t *upng);
 unsigned int upng_get_error_line(const upng_t *upng);
-
 unsigned int upng_get_width(const upng_t *upng);
 unsigned int upng_get_height(const upng_t *upng);
 unsigned int upng_get_bpp(const upng_t *upng);
