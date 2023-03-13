@@ -19,7 +19,7 @@ SDL is written in C, works natively with C++, and there are bindings available f
 * Use right and left arrow keys to turn the camera arround (keys d and a serve the same function)
 
 ## Compliation
-* $ gcc -Wall -Werror -Wextra -pedantic ./src/*.c -lm -o alx-portfolio_project sdl2-config --cflags sdl2-config --libs;
+* $ gcc -Wall -Werror -Wextra -pedantic ./src/*.c -lm -o maze sdl2-config --cflags sdl2-config --libs;
 
 ## Contributions
 Contributions are highly welcomed.
