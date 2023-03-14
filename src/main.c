@@ -1,10 +1,10 @@
 #include "../headers/header.h"
 
-/*Global Declarations*/
+/*Global Declarations
 GLOBAL
 bool gameRunning = false;
 int TicksLastFrame = 0;
-player_t player;
+player_t player;*/
 
 /**
 * updateGame - update delta time per frame
@@ -59,7 +59,7 @@ void renderGame(void)
 }
 
 /**
-* DestroyGame - free wall textures and destroy window
+* destroyGame - free wall textures and destroy window
 */
 
 void destroyGame(void)
