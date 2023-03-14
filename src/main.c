@@ -1,10 +1,9 @@
 #include "../headers/header.h"
 
-/*Global Declarations
-GLOBAL
-bool gameRunning = false;
-int TicksLastFrame = 0;
-player_t player;*/
+/* Global Declarations
+* bool gameRunning = false;
+* int TicksLastFrame = 0;
+* player_t player; */
 
 /**
 * updateGame - update delta time per frame
