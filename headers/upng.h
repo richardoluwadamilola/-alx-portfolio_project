@@ -1,4 +1,3 @@
-#pragma once
 #ifndef UPNG_H
 #define UPNG_H
 /**
