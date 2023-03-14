@@ -38,7 +38,7 @@ void horizontalInter(float rayAngle)
 		{
 			horzWallHitX = nextHorzTouchX;
 			horzWallHitY = nextHorzTouchY;
-			horzWallContent = getMapValue((int)floor(yToCheck / TILE_SIZE), 
+			horzWallContent = getMapValue((int)floor(yToCheck / TILE_SIZE),
 			(int)floor(xToCheck / TILE_SIZE));
 			foundHorzWallHit = true;
 			break;
@@ -84,7 +84,7 @@ void verticalInter(float rayAngle)
 		{
 			vertWallHitX = nextVertTouchX;
 			vertWallHitY = nextVertTouchY;
-			vertWallContent = getMapValue((int)floor(yToCheck / TILE_SIZE), 
+			vertWallContent = getMapValue((int)floor(yToCheck / TILE_SIZE),
 			(int)floor(xToCheck / TILE_SIZE));
 			foundVertWallHit = true;
 			break;
@@ -104,7 +104,7 @@ void castAllRays(void)
 
 	for (col = 0; col < NUM_RAYS; col++)
 	{
-		float rayAngle = player.rotationAngle + atan((col - NUM_RAYS / 2) 
+		float rayAngle = player.rotationAngle + atan((col - NUM_RAYS / 2)
 		/ PROJ_PLANE);
 
 		castRay(rayAngle, col);
