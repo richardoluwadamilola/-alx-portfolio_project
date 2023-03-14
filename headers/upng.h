@@ -1,12 +1,16 @@
+#pragma once
 #ifndef UPNG_H
 #define UPNG_H
 /**
 * uPNG -- derived from LodePNG version 20100808
+*
 * Copyright (c) 2005-2010 Lode Vandevenne
 * Copyright (c) 2010 Sean Middleditch
+*
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
 * arising from the use of this software.
+*
 * Permission is granted to anyone to use this software for any purpose,
 * including commercial applications, and to alter it and redistribute it
 * freely, subject to the following restrictions:
@@ -55,24 +59,25 @@ typedef enum upng_format
 
 typedef struct upng_t upng_t;
 
-upng_t *upng_new_from_bytes(const unsigned char *buffer, unsigned long size);
-upng_t *upng_new_from_file(const char *path);
-void upng_free(upng_t *upng);
+upng_t* upng_new_from_bytes(const unsigned char* buffer, unsigned long size);
+upng_t* upng_new_from_file(const char* path);
+void upng_free(upng_t* upng);
 
-upng_error upng_header(upng_t *upng);
-upng_error upng_decode(upng_t *upng);
+upng_error upng_header(upng_t* upng);
+upng_error upng_decode(upng_t* upng);
 
-upng_error upng_get_error(const upng_t *upng);
-unsigned int upng_get_error_line(const upng_t *upng);
-unsigned int upng_get_width(const upng_t *upng);
-unsigned int upng_get_height(const upng_t *upng);
-unsigned int upng_get_bpp(const upng_t *upng);
-unsigned int upng_get_bitdepth(const upng_t *upng);
-unsigned int upng_get_components(const upng_t *upng);
-unsigned int upng_get_pixelsize(const upng_t *upng);
-upng_format	upng_get_format(const upng_t *upng);
+upng_error upng_get_error(const upng_t* upng);
+unsigned int upng_get_error_line(const upng_t* upng);
 
-const unsigned char *upng_get_buffer(const upng_t *upng);
-unsigned int upng_get_size(const upng_t *upng);
+unsigned int upng_get_width(const upng_t* upng);
+unsigned int upng_get_height(const upng_t* upng);
+unsigned int upng_get_bpp(const upng_t* upng);
+unsigned int upng_get_bitdepth(const upng_t* upng);
+unsigned int upng_get_components(const upng_t* upng);
+unsigned int upng_get_pixelsize(const upng_t* upng);
+upng_format	upng_get_format(const upng_t* upng);
+
+const unsigned char* upng_get_buffer(const upng_t* upng);
+unsigned int upng_get_size(const upng_t* upng);
 
 #endif /*defined(UPNG_H)*/
