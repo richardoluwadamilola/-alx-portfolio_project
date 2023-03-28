@@ -48,7 +48,7 @@ bool initializeWindow(void)
 	colorBuffer = malloc(sizeof(color_t) * SCREEN_WIDTH * SCREEN_HEIGHT);
 
 	/* create an SDL_Texture to display the colorbuffer */
-	colorBufferTexture = SDL_CreateTexture(renderer,
+	colorBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
 		SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	return (true);
