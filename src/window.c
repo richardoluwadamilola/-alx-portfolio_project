@@ -4,6 +4,7 @@ static SDL_Renderer *renderer;
 static color_t *colorBuffer;
 static SDL_Texture *colorBufferTexture;
 static SDL_Window *window;
+static SDL_PIXELFORMAT_RGBA32;
 
 /**
  * initializeWindow - Initialize window to display the maze
