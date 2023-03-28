@@ -118,8 +118,7 @@ void castRay(float rayAngle, int stripId)
 	vertIntersection(rayAngle);
 
 	horzHitDistance = foundHorzWallHit
-		? distanceBetweenPoints(player.x, player.y, horzWallHitX, horzWallHitY)
-		: FLT_MAX;
+		? distanceBetweenPoints(player.x, player.y, horzWallHitX, horzWallHitY): FLT_MAX;
 	vertHitDistance = foundVertWallHit
 		? distanceBetweenPoints(player.x, player.y, vertWallHitX, vertWallHitY)
 		: FLT_MAX;
